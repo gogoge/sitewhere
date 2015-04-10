@@ -27,14 +27,16 @@ import com.sitewhere.mongodb.device.MongoDeviceMeasurement;
 import com.sitewhere.mongodb.device.MongoDeviceMeasurements;
 import com.sitewhere.mongodb.device.MongoDeviceStateChange;
 import com.sitewhere.rest.model.search.SearchResults;
+import com.sitewhere.security.LoginManager;
 import com.sitewhere.spi.SiteWhereException;
 import com.sitewhere.spi.device.IDeviceSpecification;
 import com.sitewhere.spi.device.event.DeviceEventType;
+import com.sitewhere.spi.device.event.IDeviceAlert;
+import com.sitewhere.spi.device.event.IDeviceCommandInvocation;
 import com.sitewhere.spi.device.event.IDeviceEvent;
+import com.sitewhere.spi.device.event.IDeviceMeasurements;
 import com.sitewhere.spi.search.IDateRangeSearchCriteria;
 import com.sitewhere.spi.search.ISearchCriteria;
-import com.sitewhere.spi.user.IUser;
-import com.sitewhere.security.LoginManager;
 
 /**
  * Common handlers for persisting Mongo data.
@@ -158,7 +160,11 @@ public class MongoPersistence {
 	 */
 	public static <T> SearchResults<T> search(Class<T> api, DBCollection collection, DBObject query,
 			DBObject sort, ISearchCriteria criteria, IMongoConverterLookup lookup) {
-		if(!api.equals(IDeviceSpecification.class) ){
+		if(!api.equals(IDeviceSpecification.class) &&
+	        	!api.equals(IDeviceMeasurements.class) &&
+	        	!api.equals(IDeviceAlert.class) &&
+	        	!api.equals(IDeviceCommandInvocation.class)
+				){
 			try{
 				String currentUser = LoginManager.getCurrentlyLoggedInUser().getUsername();
 				boolean isAdmin= currentUser.equals("admin");

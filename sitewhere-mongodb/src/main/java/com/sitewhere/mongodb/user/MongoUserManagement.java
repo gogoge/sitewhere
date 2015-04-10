@@ -234,6 +234,9 @@ public class MongoUserManagement extends LifecycleComponent implements IUserMana
 	public List<IUser> listUsers(IUserSearchCriteria criteria) throws SiteWhereException {
 		DBCollection users = getMongoClient().getUsersCollection();
 		DBObject dbCriteria = new BasicDBObject();
+		if (!criteria.isIncludeDeleted()) {
+			MongoSiteWhereEntity.setDeleted(dbCriteria, false);
+		}
 		try{
 			String currentUser = LoginManager.getCurrentlyLoggedInUser().getUsername();
 			boolean isAdmin= currentUser.equals("admin");
@@ -242,9 +245,6 @@ public class MongoUserManagement extends LifecycleComponent implements IUserMana
 			}
 		}catch(SiteWhereException e){
 			e.printStackTrace();
-		}
-		if (!criteria.isIncludeDeleted()) {
-			MongoSiteWhereEntity.setDeleted(dbCriteria, false);
 		}
 		DBCursor cursor = users.find(dbCriteria).sort(new BasicDBObject(MongoUser.PROP_USERNAME, 1));
 		List<IUser> matches = new ArrayList<IUser>();
