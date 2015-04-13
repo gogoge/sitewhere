@@ -39,6 +39,7 @@ import com.sitewhere.spi.user.IUserManagement;
 import com.sitewhere.spi.user.IUserSearchCriteria;
 import com.sitewhere.spi.user.request.IGrantedAuthorityCreateRequest;
 import com.sitewhere.spi.user.request.IUserCreateRequest;
+import com.sitewhere.security.LoginManager;
 
 /**
  * User management implementation that uses MongoDB for persistence.
@@ -235,6 +236,15 @@ public class MongoUserManagement extends LifecycleComponent implements IUserMana
 		DBObject dbCriteria = new BasicDBObject();
 		if (!criteria.isIncludeDeleted()) {
 			MongoSiteWhereEntity.setDeleted(dbCriteria, false);
+		}
+		try{
+			String currentUser = LoginManager.getCurrentlyLoggedInUser().getUsername();
+			boolean isAdmin= currentUser.equals("admin");
+			if(!isAdmin){
+				dbCriteria.put("username", currentUser);
+			}
+		}catch(SiteWhereException e){
+			e.printStackTrace();
 		}
 		DBCursor cursor = users.find(dbCriteria).sort(new BasicDBObject(MongoUser.PROP_USERNAME, 1));
 		List<IUser> matches = new ArrayList<IUser>();
